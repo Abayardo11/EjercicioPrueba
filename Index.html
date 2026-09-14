@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mi Lista</title>
+
+    <!-- Configuración PWA -->
+    <link rel="manifest" href="Implementacion.json">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f2f2f2;
+        }
+
+        .contenedor {
+            max-width: 600px;
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .entrada {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        ul {
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #eeeeee;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 500px) {
+            .entrada {
+                flex-direction: column;
+            }
+
+            li {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="contenedor">
+
+        <h1>Mi lista</h1>
+
+        <div class="entrada">
+            <input type="text" id="texto" placeholder="Escribe algo">
+            <button onclick="agregar()">Agregar</button>
+        </div>
+
+        <ul id="lista"></ul>
+
+    </div>
+
+    <script>
+        // Registrar Service Worker
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("WifiOff.js");
+        }
+
+        // Cargar elementos
+        let elementos = JSON.parse(localStorage.getItem("elementos")) || [];
+
+        mostrar();
+
+        function agregar() {
+            let texto = document.getElementById("texto").value;
+
+            if (texto != "") {
+                elementos.push(texto);
+
+                localStorage.setItem("elementos", JSON.stringify(elementos));
+
+                document.getElementById("texto").value = "";
+
+                mostrar();
+            }
+        }
+
+        function eliminar(numero) {
+            elementos.splice(numero, 1);
+
+            localStorage.setItem("elementos", JSON.stringify(elementos));
+
+            mostrar();
+        }
+
+        function mostrar() {
+            let lista = document.getElementById("lista");
+
+            lista.innerHTML = "";
+
+            for (let i = 0; i < elementos.length; i++) {
+
+                let li = document.createElement("li");
+
+                li.innerHTML = `
+                    <span>${elementos[i]}</span>
+                    <button onclick="eliminar(${i})">Eliminar</button>
+                `;
+
+                lista.appendChild(li);
+            }
+        }
+    </script>
+</body>
+</html>

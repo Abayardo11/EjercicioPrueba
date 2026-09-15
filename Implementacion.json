@@ -1,7 +1,7 @@
 {
     "name": "Mi Lista",
     "short_name": "Lista",
-    "start_url": "./Index.html",
+    "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#f2f2f2",
     "theme_color": "#ffffff",
@@ -13,3 +13,4 @@
         }
     ]
 }
+

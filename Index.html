@@ -1,15 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Mi Lista</title>
 
-    <!-- Configuración PWA -->
     <link rel="manifest" href="implementacion.json">
+</head>
+
+<body>
+
+    <div class="contenedor">
+
+        <h1>Mi Lista</h1>
+
+        <div class="entrada">
+            <input type="text" id="texto" placeholder="Escribe algo">
+            <button onclick="agregar()">Agregar</button>
+        </div>
+
+        <ul id="lista"></ul>
+
+        <p id="estado">Conectando...</p>
+
+    </div>
+
 
     <style>
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -56,7 +76,12 @@
             border-radius: 5px;
         }
 
+        #estado {
+            font-size: 14px;
+        }
+
         @media (max-width: 500px) {
+
             .entrada {
                 flex-direction: column;
             }
@@ -66,75 +91,332 @@
                 gap: 10px;
                 align-items: stretch;
             }
+
         }
+
     </style>
-</head>
 
-<body>
 
-    <div class="contenedor">
+    <!-- Firebase -->
 
-        <h1>Mi lista</h1>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
 
-        <div class="entrada">
-            <input type="text" id="texto" placeholder="Escribe algo">
-            <button onclick="agregar()">Agregar</button>
-        </div>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
 
-        <ul id="lista"></ul>
-
-    </div>
 
     <script>
-        // Registrar Service Worker
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("ifiOff.js");
+
+        // Configuración de Firebase
+
+        const firebaseConfig = {
+
+            apiKey: "AIzaSyATiJwpfYrsnEbVGtnuZxklN-XFUs7szjw",
+
+            authDomain: "ejerciciopruebaa.firebaseapp.com",
+
+            databaseURL: "https://ejerciciopruebaa-default-rtdb.firebaseio.com",
+
+            projectId: "ejerciciopruebaa",
+
+            storageBucket: "ejerciciopruebaa.firebasestorage.app",
+
+            messagingSenderId: "936617415497",
+
+            appId: "1:936617415497:web:82324a47c68c73f4a88098"
+
+        };
+
+
+        // Iniciar Firebase
+
+        firebase.initializeApp(firebaseConfig);
+
+        const db = firebase.database();
+
+
+        // Referencia para las acciones de sincronización
+
+        const accionesRef = db.ref("acciones");
+
+
+        // Guardar lista en LocalStorage
+
+        let elementos = JSON.parse(localStorage.getItem("elementos")) || [];
+
+
+        // Identificar este dispositivo
+
+        let dispositivo = localStorage.getItem("dispositivo");
+
+        if (!dispositivo) {
+
+            dispositivo = Date.now().toString();
+
+            localStorage.setItem("dispositivo", dispositivo);
+
         }
 
-        // Cargar elementos
-        let elementos = JSON.parse(localStorage.getItem("elementos")) || [];
+
+        // Acciones que ya fueron procesadas
+
+        let accionesProcesadas =
+            JSON.parse(localStorage.getItem("accionesProcesadas")) || [];
+
+
+        // Mostrar la lista
 
         mostrar();
 
-        function agregar() {
-            let texto = document.getElementById("texto").value;
-
-            if (texto != "") {
-                elementos.push(texto);
-
-                localStorage.setItem("elementos", JSON.stringify(elementos));
-
-                document.getElementById("texto").value = "";
-
-                mostrar();
-            }
-        }
-
-        function eliminar(numero) {
-            elementos.splice(numero, 1);
-
-            localStorage.setItem("elementos", JSON.stringify(elementos));
-
-            mostrar();
-        }
 
         function mostrar() {
+
             let lista = document.getElementById("lista");
 
             lista.innerHTML = "";
+
 
             for (let i = 0; i < elementos.length; i++) {
 
                 let li = document.createElement("li");
 
-                li.innerHTML = `
-                    <span>${elementos[i]}</span>
-                    <button onclick="eliminar(${i})">Eliminar</button>
-                `;
+
+                let texto = document.createElement("span");
+
+                texto.textContent = elementos[i];
+
+
+                let boton = document.createElement("button");
+
+                boton.textContent = "Eliminar";
+
+                boton.onclick = function() {
+
+                    eliminar(i);
+
+                };
+
+
+                li.appendChild(texto);
+
+                li.appendChild(boton);
 
                 lista.appendChild(li);
+
             }
+
         }
+
+
+        // Agregar elemento
+
+        function agregar() {
+
+            let texto = document.getElementById("texto").value;
+
+
+            if (texto != "") {
+
+                elementos.push(texto);
+
+
+                guardarLocal();
+
+
+                document.getElementById("texto").value = "";
+
+
+                mostrar();
+
+            }
+
+        }
+
+
+        // Eliminar elemento
+
+        function eliminar(numero) {
+
+            if (numero < elementos.length) {
+
+                elementos.splice(numero, 1);
+
+                guardarLocal();
+
+                mostrar();
+
+
+                // Crear una acción para sincronizar
+
+                let accion = {
+
+                    tipo: "eliminar",
+
+                    posicion: numero,
+
+                    dispositivo: dispositivo,
+
+                    fecha: Date.now()
+
+                };
+
+
+                // Verificación de conexión para guardar pendientes localmente
+                if (navigator.onLine) {
+
+                    accionesRef.push(accion);
+
+                } else {
+
+                    let pendientes =
+                        JSON.parse(localStorage.getItem("accionesPendientes")) || [];
+
+                    pendientes.push(accion);
+
+                    localStorage.setItem(
+                        "accionesPendientes",
+                        JSON.stringify(pendientes)
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        // Guardar en LocalStorage
+
+        function guardarLocal() {
+
+            localStorage.setItem(
+                "elementos",
+                JSON.stringify(elementos)
+            );
+
+        }
+
+
+        // Escuchar cambios de Firebase
+
+        accionesRef.on("child_added", function(snapshot) {
+
+            let id = snapshot.key;
+
+            let accion = snapshot.val();
+
+
+            // Evitar procesar la misma acción dos veces
+
+            if (accionesProcesadas.includes(id)) {
+
+                return;
+
+            }
+
+
+            accionesProcesadas.push(id);
+
+            localStorage.setItem(
+                "accionesProcesadas",
+                JSON.stringify(accionesProcesadas)
+            );
+
+
+            // No volver a ejecutar nuestra propia acción
+
+            if (accion.dispositivo == dispositivo) {
+
+                return;
+
+            }
+
+
+            // Si es una eliminación
+
+            if (accion.tipo == "eliminar") {
+
+                let posicion = accion.posicion;
+
+
+                if (posicion < elementos.length) {
+
+                    elementos.splice(posicion, 1);
+
+                    guardarLocal();
+
+                    mostrar();
+
+                }
+
+            }
+
+        });
+
+
+        // Detectar conexión
+
+        const conexionRef = db.ref(".info/connected");
+
+
+        conexionRef.on("value", function(snapshot) {
+
+            let estado = document.getElementById("estado");
+
+
+            if (snapshot.val() === true) {
+
+                estado.textContent = "Conectado";
+
+                sincronizarAccionesPendientes();
+
+            } else {
+
+                estado.textContent = "Sin conexión";
+
+            }
+
+        });
+
+
+        // Guardar acciones pendientes cuando no hay conexión
+
+        function sincronizarAccionesPendientes() {
+
+            let pendientes =
+                JSON.parse(localStorage.getItem("accionesPendientes")) || [];
+
+
+            if (pendientes.length == 0) {
+
+                return;
+
+            }
+
+
+            for (let i = 0; i < pendientes.length; i++) {
+
+                accionesRef.push(pendientes[i]);
+
+            }
+
+
+            localStorage.setItem(
+                "accionesPendientes",
+                JSON.stringify([])
+            );
+
+        }
+
+
+        // Registrar Service Worker
+
+        if ("serviceWorker" in navigator) {
+
+            navigator.serviceWorker.register("wifioff.js");
+
+        }
+
     </script>
+
 </body>
 </html>

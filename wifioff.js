@@ -14,7 +14,7 @@ self.addEventListener("install", function(event) {
 
     event.waitUntil(
 
-        caches.open("mi-lista-v3").then(function(cache) {
+        caches.open("mi-lista-v4").then(function(cache) {
 
             return cache.addAll(archivos);
 

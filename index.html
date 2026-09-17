@@ -17,8 +17,11 @@
         <h1>Mi Lista</h1>
 
         <div class="entrada">
+
             <input type="text" id="texto" placeholder="Escribe algo">
+
             <button onclick="agregar()">Agregar</button>
+
         </div>
 
         <ul id="lista"></ul>
@@ -134,36 +137,17 @@
         const db = firebase.database();
 
 
-        // Referencia para las acciones de sincronización
+        // Referencia de las tareas
 
-        const accionesRef = db.ref("acciones");
+        const tareasRef = db.ref("tareas");
 
 
-        // Guardar lista en LocalStorage
+        // Lista local
 
         let elementos = JSON.parse(localStorage.getItem("elementos")) || [];
 
 
-        // Identificar este dispositivo
-
-        let dispositivo = localStorage.getItem("dispositivo");
-
-        if (!dispositivo) {
-
-            dispositivo = Date.now().toString();
-
-            localStorage.setItem("dispositivo", dispositivo);
-
-        }
-
-
-        // Acciones que ya fueron procesadas
-
-        let accionesProcesadas =
-            JSON.parse(localStorage.getItem("accionesProcesadas")) || [];
-
-
-        // Mostrar la lista
+        // Mostrar lista
 
         mostrar();
 
@@ -182,16 +166,17 @@
 
                 let texto = document.createElement("span");
 
-                texto.textContent = elementos[i];
+                texto.textContent = elementos[i].texto;
 
 
                 let boton = document.createElement("button");
 
                 boton.textContent = "Eliminar";
 
+
                 boton.onclick = function() {
 
-                    eliminar(i);
+                    eliminar(elementos[i].id);
 
                 };
 
@@ -207,7 +192,7 @@
         }
 
 
-        // Agregar elemento
+        // Agregar tarea
 
         function agregar() {
 
@@ -216,72 +201,81 @@
 
             if (texto != "") {
 
-                elementos.push(texto);
+                tareasRef.push({
 
+                    texto: texto
 
-                guardarLocal();
+                });
 
 
                 document.getElementById("texto").value = "";
 
-
-                mostrar();
-
             }
 
         }
 
 
-        // Eliminar elemento
+        // Eliminar tarea
 
-        function eliminar(numero) {
+        function eliminar(id) {
 
-            if (numero < elementos.length) {
+            tareasRef.child(id).remove();
 
-                elementos.splice(numero, 1);
+        }
+
+
+        // Cuando se agrega una tarea
+
+        tareasRef.on("child_added", function(snapshot) {
+
+            let tarea = {
+
+                id: snapshot.key,
+
+                texto: snapshot.val().texto
+
+            };
+
+
+            let existe = elementos.find(function(elemento) {
+
+                return elemento.id === tarea.id;
+
+            });
+
+
+            if (!existe) {
+
+                elementos.push(tarea);
 
                 guardarLocal();
 
                 mostrar();
 
-
-                // Crear una acción para sincronizar
-
-                let accion = {
-
-                    tipo: "eliminar",
-
-                    posicion: numero,
-
-                    dispositivo: dispositivo,
-
-                    fecha: Date.now()
-
-                };
-
-
-                // Verificación de conexión para guardar pendientes localmente
-                if (navigator.onLine) {
-
-                    accionesRef.push(accion);
-
-                } else {
-
-                    let pendientes =
-                        JSON.parse(localStorage.getItem("accionesPendientes")) || [];
-
-                    pendientes.push(accion);
-
-                    localStorage.setItem(
-                        "accionesPendientes",
-                        JSON.stringify(pendientes)
-                    );
-
-                }
-
             }
 
-        }
+        });
+
+
+        // Cuando se elimina una tarea
+
+        tareasRef.on("child_removed", function(snapshot) {
+
+            let id = snapshot.key;
+
+
+            elementos = elementos.filter(function(elemento) {
+
+                return elemento.id != id;
+
+            });
+
+
+            guardarLocal();
+
+            mostrar();
+
+        });
 
 
         // Guardar en LocalStorage
@@ -294,63 +288,6 @@
             );
 
         }
-
-
-        // Escuchar cambios de Firebase
-
-        accionesRef.on("child_added", function(snapshot) {
-
-            let id = snapshot.key;
-
-            let accion = snapshot.val();
-
-
-            // Evitar procesar la misma acción dos veces
-
-            if (accionesProcesadas.includes(id)) {
-
-                return;
-
-            }
-
-
-            accionesProcesadas.push(id);
-
-            localStorage.setItem(
-                "accionesProcesadas",
-                JSON.stringify(accionesProcesadas)
-            );
-
-
-            // No volver a ejecutar nuestra propia acción
-
-            if (accion.dispositivo == dispositivo) {
-
-                return;
-
-            }
-
-
-            // Si es una eliminación
-
-            if (accion.tipo == "eliminar") {
-
-                let posicion = accion.posicion;
-
-
-                if (posicion < elementos.length) {
-
-                    elementos.splice(posicion, 1);
-
-                    guardarLocal();
-
-                    mostrar();
-
-                }
-
-            }
-
-        });
 
 
         // Detectar conexión
@@ -367,8 +304,6 @@
 
                 estado.textContent = "Conectado";
 
-                sincronizarAccionesPendientes();
-
             } else {
 
                 estado.textContent = "Sin conexión";
@@ -378,36 +313,6 @@
         });
 
 
-        // Guardar acciones pendientes cuando no hay conexión
-
-        function sincronizarAccionesPendientes() {
-
-            let pendientes =
-                JSON.parse(localStorage.getItem("accionesPendientes")) || [];
-
-
-            if (pendientes.length == 0) {
-
-                return;
-
-            }
-
-
-            for (let i = 0; i < pendientes.length; i++) {
-
-                accionesRef.push(pendientes[i]);
-
-            }
-
-
-            localStorage.setItem(
-                "accionesPendientes",
-                JSON.stringify([])
-            );
-
-        }
-
-
         // Registrar Service Worker
 
         if ("serviceWorker" in navigator) {
@@ -415,8 +320,6 @@
             navigator.serviceWorker.register("wifioff.js");
 
         }
-
     </script>
-
 </body>
 </html>

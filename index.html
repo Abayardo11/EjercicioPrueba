@@ -14,13 +14,13 @@
 
     <div class="contenedor">
 
-        <h1>Mi ListAAA</h1>
+        <h1>Mi Lista</h1>
 
         <div class="entrada">
 
             <input type="text" id="texto" placeholder="Escribe algo">
 
-            <button onclick="agregar()">AgregAr</button>
+            <button onclick="agregar()">Agregar</button>
 
         </div>
 
@@ -288,30 +288,6 @@
             );
 
         }
-
-
-        // Detectar conexión
-
-        const conexionRef = db.ref(".info/connected");
-
-
-        conexionRef.on("value", function(snapshot) {
-
-            let estado = document.getElementById("estado");
-
-
-            if (snapshot.val() === true) {
-
-                estado.textContent = "Conectado";
-
-            } else {
-
-                estado.textContent = "Sin conexión";
-
-            }
-
-        });
-
 
         // Registrar Service Worker
 

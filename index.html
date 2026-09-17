@@ -289,6 +289,30 @@
 
         }
 
+
+        // Detectar conexión
+
+        const conexionRef = db.ref(".info/connected");
+
+
+        conexionRef.on("value", function(snapshot) {
+
+            let estado = document.getElementById("estado");
+
+
+            if (snapshot.val() === true) {
+
+                estado.textContent = "Conectado";
+
+            } else {
+
+                estado.textContent = "Sin conexión";
+
+            }
+
+        });
+
+
         // Registrar Service Worker
 
         if ("serviceWorker" in navigator) {

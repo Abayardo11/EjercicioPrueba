@@ -25,6 +25,33 @@ self.addEventListener("install", function(event) {
 });
 
 
+self.addEventListener("activate", function(event) {
+
+    event.waitUntil(
+
+        caches.keys().then(function(nombres) {
+
+            return Promise.all(
+
+                nombres.map(function(nombre) {
+
+                    if (nombre != "mi-lista-v4") {
+
+                        return caches.delete(nombre);
+
+                    }
+
+                })
+
+            );
+
+        })
+
+    );
+
+});
+
+
 self.addEventListener("fetch", function(event) {
 
     event.respondWith(

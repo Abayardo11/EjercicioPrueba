@@ -2,31 +2,79 @@
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Mi Lista</title>
 
     <link rel="manifest" href="implementacion.json">
+
 </head>
+
 
 <body>
 
-    <div class="contenedor">
+    <!-- Pantalla de usuario -->
+
+    <div id="pantallaUsuario" class="contenedor">
 
         <h1>Mi Lista</h1>
 
+        <p>Ingresa tu usuario</p>
+
+        <input
+            type="text"
+            id="usuario"
+            placeholder="Nombre de usuario"
+        >
+
+        <button onclick="entrar()">
+            Entrar
+        </button>
+
+    </div>
+
+
+    <!-- Pantalla de tareas -->
+
+    <div id="pantallaTareas" class="contenedor" style="display: none;">
+
+        <h1>Mi Lista</h1>
+
+        <p>
+            Usuario:
+            <strong id="nombreUsuario"></strong>
+        </p>
+
+
         <div class="entrada">
 
-            <input type="text" id="texto" placeholder="Escribe algo">
+            <input
+                type="text"
+                id="texto"
+                placeholder="Escribe una tarea"
+            >
 
-            <button onclick="agregar()">Agregar</button>
+            <button onclick="agregar()">
+                Agregar
+            </button>
 
         </div>
 
+
         <ul id="lista"></ul>
 
-        <p id="estado">Conectando...</p>
+
+        <p id="estado">
+            Conectando...
+        </p>
+
+
+        <button onclick="salir()">
+            Cerrar sesión
+        </button>
 
     </div>
 
@@ -34,65 +82,141 @@
     <style>
 
         body {
+
             font-family: Arial, sans-serif;
+
             margin: 0;
+
             padding: 20px;
+
             background-color: #f2f2f2;
+
         }
+
 
         .contenedor {
+
             max-width: 600px;
-            margin: auto;
+
+            margin: 40px auto;
+
             background-color: white;
+
             padding: 20px;
+
             border-radius: 10px;
+
         }
 
-        .entrada {
-            display: flex;
-            gap: 10px;
-        }
 
         input {
-            flex: 1;
+
+            box-sizing: border-box;
+
+            width: 100%;
+
             padding: 10px;
+
+            margin-bottom: 10px;
+
             font-size: 16px;
+
         }
+
 
         button {
+
             padding: 10px 15px;
+
             cursor: pointer;
+
+            margin-bottom: 10px;
+
         }
+
+
+        .entrada {
+
+            display: flex;
+
+            gap: 10px;
+
+        }
+
+
+        .entrada input {
+
+            margin-bottom: 0;
+
+        }
+
+
+        .entrada button {
+
+            white-space: nowrap;
+
+        }
+
 
         ul {
+
             padding: 0;
+
             list-style: none;
+
         }
+
 
         li {
+
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
             padding: 10px;
+
             margin-top: 10px;
+
             background-color: #eeeeee;
+
             border-radius: 5px;
+
         }
 
-        #estado {
-            font-size: 14px;
+
+        li button {
+
+            margin: 0;
+
         }
+
+
+        #estado {
+
+            font-size: 14px;
+
+        }
+
 
         @media (max-width: 500px) {
 
             .entrada {
+
                 flex-direction: column;
+
             }
 
+
             li {
+
                 flex-direction: column;
+
                 gap: 10px;
+
                 align-items: stretch;
+
             }
 
         }
@@ -137,57 +261,145 @@
         const db = firebase.database();
 
 
+        // Usuario actual
+
+        let usuarioActual = localStorage.getItem("usuarioActual");
+
+
         // Referencia de las tareas
 
-        const tareasRef = db.ref("tareas");
+        let tareasRef = null;
 
 
-        // Lista local
+        // Mostrar usuario guardado
 
-        let elementos = JSON.parse(localStorage.getItem("elementos")) || [];
+        if (usuarioActual) {
 
+            iniciarAplicacion();
 
-        // Mostrar lista
-
-        mostrar();
-
-
-        function mostrar() {
-
-            let lista = document.getElementById("lista");
-
-            lista.innerHTML = "";
+        }
 
 
-            for (let i = 0; i < elementos.length; i++) {
+        // Entrar
 
-                let li = document.createElement("li");
+        function entrar() {
 
-
-                let texto = document.createElement("span");
-
-                texto.textContent = elementos[i].texto;
-
-
-                let boton = document.createElement("button");
-
-                boton.textContent = "Eliminar";
+            let usuario = document
+                .getElementById("usuario")
+                .value
+                .trim();
 
 
-                boton.onclick = function() {
+            if (usuario == "") {
 
-                    eliminar(elementos[i].id);
+                alert("Escribe un usuario.");
 
-                };
-
-
-                li.appendChild(texto);
-
-                li.appendChild(boton);
-
-                lista.appendChild(li);
+                return;
 
             }
+
+
+            localStorage.setItem(
+                "usuarioActual",
+                usuario
+            );
+
+
+            usuarioActual = usuario;
+
+
+            iniciarAplicacion();
+
+        }
+
+
+        // Iniciar aplicación
+
+        function iniciarAplicacion() {
+
+            document
+                .getElementById("pantallaUsuario")
+                .style.display = "none";
+
+
+            document
+                .getElementById("pantallaTareas")
+                .style.display = "block";
+
+
+            document
+                .getElementById("nombreUsuario")
+                .textContent = usuarioActual;
+
+
+            // Crear referencia exclusiva para este usuario
+
+            tareasRef = db
+                .ref("usuarios")
+                .child(usuarioActual)
+                .child("tareas");
+
+
+            escucharTareas();
+
+        }
+
+
+        // Escuchar tareas de Firebase
+
+        function escucharTareas() {
+
+            tareasRef.off();
+
+
+            tareasRef.on("value", function(snapshot) {
+
+                let lista = document.getElementById("lista");
+
+                lista.innerHTML = "";
+
+
+                if (!snapshot.exists()) {
+
+                    return;
+
+                }
+
+
+                snapshot.forEach(function(hijo) {
+
+                    let tarea = hijo.val();
+
+
+                    let li = document.createElement("li");
+
+
+                    let texto = document.createElement("span");
+
+                    texto.textContent = tarea.texto;
+
+
+                    let boton = document.createElement("button");
+
+                    boton.textContent = "Eliminar";
+
+
+                    boton.onclick = function() {
+
+                        eliminar(hijo.key);
+
+                    };
+
+
+                    li.appendChild(texto);
+
+                    li.appendChild(boton);
+
+                    lista.appendChild(li);
+
+                });
+
+            });
 
         }
 
@@ -196,21 +408,31 @@
 
         function agregar() {
 
-            let texto = document.getElementById("texto").value;
+            let texto = document
+                .getElementById("texto")
+                .value
+                .trim();
 
 
-            if (texto != "") {
+            if (texto == "") {
 
-                tareasRef.push({
-
-                    texto: texto
-
-                });
-
-
-                document.getElementById("texto").value = "";
+                return;
 
             }
+
+
+            tareasRef.push({
+
+                texto: texto,
+
+                fecha: Date.now()
+
+            });
+
+
+            document
+                .getElementById("texto")
+                .value = "";
 
         }
 
@@ -219,73 +441,37 @@
 
         function eliminar(id) {
 
-            tareasRef.child(id).remove();
+            tareasRef
+                .child(id)
+                .remove();
 
         }
 
 
-        // Cuando se agrega una tarea
+        // Cerrar sesión
 
-        tareasRef.on("child_added", function(snapshot) {
+        function salir() {
 
-            let tarea = {
+            localStorage.removeItem("usuarioActual");
 
-                id: snapshot.key,
+            usuarioActual = null;
 
-                texto: snapshot.val().texto
-
-            };
+            tareasRef = null;
 
 
-            let existe = elementos.find(function(elemento) {
-
-                return elemento.id === tarea.id;
-
-            });
+            document
+                .getElementById("pantallaTareas")
+                .style.display = "none";
 
 
-            if (!existe) {
-
-                elementos.push(tarea);
-
-                guardarLocal();
-
-                mostrar();
-
-            }
-
-        });
+            document
+                .getElementById("pantallaUsuario")
+                .style.display = "block";
 
 
-        // Cuando se elimina una tarea
-
-        tareasRef.on("child_removed", function(snapshot) {
-
-            let id = snapshot.key;
-
-
-            elementos = elementos.filter(function(elemento) {
-
-                return elemento.id != id;
-
-            });
-
-
-            guardarLocal();
-
-            mostrar();
-
-        });
-
-
-        // Guardar en LocalStorage
-
-        function guardarLocal() {
-
-            localStorage.setItem(
-                "elementos",
-                JSON.stringify(elementos)
-            );
+            document
+                .getElementById("usuario")
+                .value = "";
 
         }
 
@@ -297,16 +483,21 @@
 
         conexionRef.on("value", function(snapshot) {
 
-            let estado = document.getElementById("estado");
+            let estado =
+                document.getElementById("estado");
 
 
-            if (snapshot.val() === true) {
+            if (estado) {
 
-                estado.textContent = "Conectado";
+                if (snapshot.val() === true) {
 
-            } else {
+                    estado.textContent = "Conectado";
 
-                estado.textContent = "Sin conexión";
+                } else {
+
+                    estado.textContent = "Sin conexión";
+
+                }
 
             }
 
@@ -320,6 +511,9 @@
             navigator.serviceWorker.register("wifioff.js");
 
         }
+
     </script>
+
 </body>
+
 </html>

@@ -11,229 +11,330 @@
 
     <link rel="manifest" href="implementacion.json">
 
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f2f2f2;
+        }
+
+
+        .contenedor {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+
+        h1 {
+            text-align: center;
+        }
+
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+
+        button {
+            padding: 11px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+
+        .boton-principal {
+            width: 100%;
+            background-color: #1877f2;
+            color: white;
+            font-size: 16px;
+        }
+
+
+        .boton-crear {
+            width: 100%;
+            background-color: #42b72a;
+            color: white;
+            font-size: 16px;
+        }
+
+
+        .boton-regresar {
+            width: 100%;
+            background-color: #777;
+            color: white;
+            font-size: 16px;
+        }
+
+
+        .mensaje-registro {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+
+        .separador {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+
+
+        .contenedor-tarea {
+            display: flex;
+            gap: 10px;
+        }
+
+
+        .contenedor-tarea input {
+            margin-bottom: 0;
+        }
+
+
+        .boton-agregar {
+            background-color: #1877f2;
+            color: white;
+            white-space: nowrap;
+        }
+
+
+        .tarea {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+
+        .tarea span {
+            word-break: break-word;
+        }
+
+
+        .boton-eliminar {
+            background-color: #e74c3c;
+            color: white;
+            margin-left: 10px;
+        }
+
+
+        .boton-cerrar {
+            width: 100%;
+            background-color: #777;
+            color: white;
+            margin-top: 20px;
+        }
+
+
+        #registro {
+            display: none;
+        }
+
+
+        #app {
+            display: none;
+        }
+
+
+        #mensaje {
+            text-align: center;
+            color: red;
+        }
+
+    </style>
+
 </head>
 
 
 <body>
 
-    <!-- Pantalla de usuario -->
 
-    <div id="pantallaUsuario" class="contenedor">
-
-        <h1>Mi Lista</h1>
-
-        <p>Ingresa tu usuario</p>
-
-        <input
-            type="text"
-            id="usuario"
-            placeholder="Nombre de usuario"
-        >
-
-        <button onclick="entrar()">
-            Entrar
-        </button>
-
-    </div>
+    <div class="contenedor">
 
 
-    <!-- Pantalla de tareas -->
+        <!-- INICIO DE SESIÓN -->
 
-    <div id="pantallaTareas" class="contenedor" style="display: none;">
+        <div id="login">
 
-        <h1>Mi Lista</h1>
+            <h1>Mi Lista</h1>
 
-        <p>
-            Usuario:
-            <strong id="nombreUsuario"></strong>
-        </p>
+            <h2>Iniciar sesión</h2>
 
 
-        <div class="entrada">
+            <input
+                type="email"
+                id="emailLogin"
+                placeholder="Correo electrónico">
+
+
+            <input
+                type="password"
+                id="passwordLogin"
+                placeholder="Contraseña">
+
+
+            <button
+                class="boton-principal"
+                onclick="iniciarSesion()">
+
+                Iniciar sesión
+
+            </button>
+
+
+            <hr class="separador">
+
+
+            <div class="mensaje-registro">
+
+                <p>¿No tienes una cuenta?</p>
+
+
+                <button
+                    class="boton-crear"
+                    onclick="mostrarRegistro()">
+
+                    Crear una nueva cuenta
+
+                </button>
+
+            </div>
+
+
+            <p id="mensaje"></p>
+
+        </div>
+
+
+
+        <!-- REGISTRO -->
+
+        <div id="registro">
+
+            <h1>Crear cuenta</h1>
+
 
             <input
                 type="text"
-                id="texto"
-                placeholder="Escribe una tarea"
-            >
+                id="nombre"
+                placeholder="Tu nombre">
 
-            <button onclick="agregar()">
-                Agregar
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Correo electrónico">
+
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Contraseña">
+
+
+            <button
+                class="boton-crear"
+                onclick="crearCuenta()">
+
+                Crear cuenta
+
+            </button>
+
+
+            <button
+                class="boton-regresar"
+                onclick="mostrarLogin()">
+
+                Regresar al inicio de sesión
+
+            </button>
+
+
+            <p id="mensajeRegistro"></p>
+
+        </div>
+
+
+
+        <!-- APLICACIÓN -->
+
+        <div id="app">
+
+            <h1>Mi Lista</h1>
+
+
+            <p id="usuario"></p>
+
+
+            <!-- AGREGAR TAREA -->
+
+            <div class="contenedor-tarea">
+
+                <input
+                    type="text"
+                    id="textoTarea"
+                    placeholder="Escribe una tarea">
+
+                <button
+                    class="boton-agregar"
+                    onclick="agregarTarea()">
+
+                    Agregar
+
+                </button>
+
+            </div>
+
+
+            <!-- LISTA DE TAREAS -->
+
+            <div id="lista"></div>
+
+
+            <!-- CERRAR SESIÓN -->
+
+            <button
+                class="boton-cerrar"
+                onclick="cerrarSesion()">
+
+                Cerrar sesión
+
             </button>
 
         </div>
 
 
-        <ul id="lista"></ul>
-
-
-        <p id="estado">
-            Conectando...
-        </p>
-
-
-        <button onclick="salir()">
-            Cerrar sesión
-        </button>
-
     </div>
 
 
-    <style>
 
-        body {
-
-            font-family: Arial, sans-serif;
-
-            margin: 0;
-
-            padding: 20px;
-
-            background-color: #f2f2f2;
-
-        }
-
-
-        .contenedor {
-
-            max-width: 600px;
-
-            margin: 40px auto;
-
-            background-color: white;
-
-            padding: 20px;
-
-            border-radius: 10px;
-
-        }
-
-
-        input {
-
-            box-sizing: border-box;
-
-            width: 100%;
-
-            padding: 10px;
-
-            margin-bottom: 10px;
-
-            font-size: 16px;
-
-        }
-
-
-        button {
-
-            padding: 10px 15px;
-
-            cursor: pointer;
-
-            margin-bottom: 10px;
-
-        }
-
-
-        .entrada {
-
-            display: flex;
-
-            gap: 10px;
-
-        }
-
-
-        .entrada input {
-
-            margin-bottom: 0;
-
-        }
-
-
-        .entrada button {
-
-            white-space: nowrap;
-
-        }
-
-
-        ul {
-
-            padding: 0;
-
-            list-style: none;
-
-        }
-
-
-        li {
-
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-
-            padding: 10px;
-
-            margin-top: 10px;
-
-            background-color: #eeeeee;
-
-            border-radius: 5px;
-
-        }
-
-
-        li button {
-
-            margin: 0;
-
-        }
-
-
-        #estado {
-
-            font-size: 14px;
-
-        }
-
-
-        @media (max-width: 500px) {
-
-            .entrada {
-
-                flex-direction: column;
-
-            }
-
-
-            li {
-
-                flex-direction: column;
-
-                gap: 10px;
-
-                align-items: stretch;
-
-            }
-
-        }
-
-    </style>
-
-
-    <!-- Firebase -->
+    <!-- FIREBASE -->
 
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
 
 
+
     <script>
 
-        // Configuración de Firebase
+
+        // CONFIGURACIÓN DE FIREBASE
 
         const firebaseConfig = {
 
@@ -254,89 +355,174 @@
         };
 
 
-        // Iniciar Firebase
-
         firebase.initializeApp(firebaseConfig);
+
+
+        const auth = firebase.auth();
 
         const db = firebase.database();
 
 
-        // Usuario actual
-
-        let usuarioActual = localStorage.getItem("usuarioActual");
-
-
-        // Referencia de las tareas
-
         let tareasRef = null;
 
 
-        // Mostrar usuario guardado
 
-        if (usuarioActual) {
+        // MOSTRAR REGISTRO
 
-            iniciarAplicacion();
+        function mostrarRegistro() {
+
+            document.getElementById("login").style.display = "none";
+
+            document.getElementById("registro").style.display = "block";
+
+            document.getElementById("mensaje").innerText = "";
 
         }
 
 
-        // Entrar
 
-        function entrar() {
+        // MOSTRAR LOGIN
 
-            let usuario = document
-                .getElementById("usuario")
-                .value
-                .trim();
+        function mostrarLogin() {
+
+            document.getElementById("login").style.display = "block";
+
+            document.getElementById("registro").style.display = "none";
+
+            document.getElementById("mensajeRegistro").innerText = "";
+
+        }
 
 
-            if (usuario == "") {
 
-                alert("Escribe un usuario.");
+        // CREAR CUENTA
+
+        function crearCuenta() {
+
+            let nombre =
+                document.getElementById("nombre").value;
+
+            let email =
+                document.getElementById("email").value;
+
+            let password =
+                document.getElementById("password").value;
+
+
+            if (nombre == "" || email == "" || password == "") {
+
+                document.getElementById("mensajeRegistro").innerText =
+                    "Completa todos los campos.";
 
                 return;
 
             }
 
 
-            localStorage.setItem(
-                "usuarioActual",
-                usuario
-            );
+            auth.createUserWithEmailAndPassword(email, password)
+
+                .then(function(resultado) {
+
+                    let usuario = resultado.user;
 
 
-            usuarioActual = usuario;
+                    return usuario.updateProfile({
 
+                        displayName: nombre
 
-            iniciarAplicacion();
+                    });
+
+                })
+
+                .catch(function(error) {
+
+                    document.getElementById("mensajeRegistro").innerText =
+                        error.message;
+
+                });
 
         }
 
 
-        // Iniciar aplicación
 
-        function iniciarAplicacion() {
+        // INICIAR SESIÓN
 
-            document
-                .getElementById("pantallaUsuario")
-                .style.display = "none";
+        function iniciarSesion() {
 
+            let email =
+                document.getElementById("emailLogin").value;
 
-            document
-                .getElementById("pantallaTareas")
-                .style.display = "block";
+            let password =
+                document.getElementById("passwordLogin").value;
 
 
-            document
-                .getElementById("nombreUsuario")
-                .textContent = usuarioActual;
+            if (email == "" || password == "") {
+
+                document.getElementById("mensaje").innerText =
+                    "Escribe tu correo y contraseña.";
+
+                return;
+
+            }
 
 
-            // Crear referencia exclusiva para este usuario
+            auth.signInWithEmailAndPassword(email, password)
+
+                .catch(function(error) {
+
+                    document.getElementById("mensaje").innerText =
+                        error.message;
+
+                });
+
+        }
+
+
+
+        // DETECTAR USUARIO
+
+        auth.onAuthStateChanged(function(user) {
+
+            if (user) {
+
+                mostrarAplicacion(user);
+
+            }
+
+            else {
+
+                document.getElementById("login").style.display = "block";
+
+                document.getElementById("registro").style.display = "none";
+
+                document.getElementById("app").style.display = "none";
+
+            }
+
+        });
+
+
+
+        // MOSTRAR APLICACIÓN
+
+        function mostrarAplicacion(user) {
+
+            document.getElementById("login").style.display = "none";
+
+            document.getElementById("registro").style.display = "none";
+
+            document.getElementById("app").style.display = "block";
+
+
+            document.getElementById("usuario").innerText =
+                "Hola, " + (user.displayName || user.email);
+
+
+            // TAREAS DEL USUARIO ACTUAL
 
             tareasRef = db
                 .ref("usuarios")
-                .child(usuarioActual)
+                .child(user.uid)
                 .child("tareas");
 
 
@@ -345,7 +531,8 @@
         }
 
 
-        // Escuchar tareas de Firebase
+
+        // ESCUCHAR TAREAS
 
         function escucharTareas() {
 
@@ -354,48 +541,54 @@
 
             tareasRef.on("value", function(snapshot) {
 
-                let lista = document.getElementById("lista");
+                let lista =
+                    document.getElementById("lista");
+
 
                 lista.innerHTML = "";
 
 
-                if (!snapshot.exists()) {
+                snapshot.forEach(function(tarea) {
 
-                    return;
-
-                }
+                    let datos = tarea.val();
 
 
-                snapshot.forEach(function(hijo) {
-
-                    let tarea = hijo.val();
-
-
-                    let li = document.createElement("li");
+                    let div =
+                        document.createElement("div");
 
 
-                    let texto = document.createElement("span");
-
-                    texto.textContent = tarea.texto;
+                    div.className = "tarea";
 
 
-                    let boton = document.createElement("button");
+                    let texto =
+                        document.createElement("span");
 
-                    boton.textContent = "Eliminar";
+
+                    texto.innerText = datos.texto;
+
+
+                    let boton =
+                        document.createElement("button");
+
+
+                    boton.innerText = "Eliminar";
+
+
+                    boton.className = "boton-eliminar";
 
 
                     boton.onclick = function() {
 
-                        eliminar(hijo.key);
+                        eliminarTarea(tarea.key);
 
                     };
 
 
-                    li.appendChild(texto);
+                    div.appendChild(texto);
 
-                    li.appendChild(boton);
+                    div.appendChild(boton);
 
-                    lista.appendChild(li);
+                    lista.appendChild(div);
 
                 });
 
@@ -404,14 +597,16 @@
         }
 
 
-        // Agregar tarea
 
-        function agregar() {
+        // AGREGAR TAREA
 
-            let texto = document
-                .getElementById("texto")
-                .value
-                .trim();
+        function agregarTarea() {
+
+            let input =
+                document.getElementById("textoTarea");
+
+
+            let texto = input.value;
 
 
             if (texto == "") {
@@ -430,16 +625,15 @@
             });
 
 
-            document
-                .getElementById("texto")
-                .value = "";
+            input.value = "";
 
         }
 
 
-        // Eliminar tarea
 
-        function eliminar(id) {
+        // ELIMINAR TAREA
+
+        function eliminarTarea(id) {
 
             tareasRef
                 .child(id)
@@ -448,71 +642,18 @@
         }
 
 
-        // Cerrar sesión
 
-        function salir() {
+        // CERRAR SESIÓN
 
-            localStorage.removeItem("usuarioActual");
+        function cerrarSesion() {
 
-            usuarioActual = null;
-
-            tareasRef = null;
-
-
-            document
-                .getElementById("pantallaTareas")
-                .style.display = "none";
-
-
-            document
-                .getElementById("pantallaUsuario")
-                .style.display = "block";
-
-
-            document
-                .getElementById("usuario")
-                .value = "";
+            auth.signOut();
 
         }
 
-
-        // Detectar conexión
-
-        const conexionRef = db.ref(".info/connected");
-
-
-        conexionRef.on("value", function(snapshot) {
-
-            let estado =
-                document.getElementById("estado");
-
-
-            if (estado) {
-
-                if (snapshot.val() === true) {
-
-                    estado.textContent = "Conectado";
-
-                } else {
-
-                    estado.textContent = "Sin conexión";
-
-                }
-
-            }
-
-        });
-
-
-        // Registrar Service Worker
-
-        if ("serviceWorker" in navigator) {
-
-            navigator.serviceWorker.register("wifioff.js");
-
-        }
 
     </script>
+
 
 </body>
 

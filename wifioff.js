@@ -1,12 +1,9 @@
 let archivos = [
     "./",
     "./index.html",
+    "./offline.html",
     "./implementacion.json",
-    "./icon.svg",
-
-    "https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js",
-
-    "https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"
+    "./icon.svg"
 ];
 
 
@@ -14,7 +11,7 @@ self.addEventListener("install", function(event) {
 
     event.waitUntil(
 
-        caches.open("mi-lista-v4").then(function(cache) {
+        caches.open("mi-lista-v6").then(function(cache) {
 
             return cache.addAll(archivos);
 
@@ -23,6 +20,7 @@ self.addEventListener("install", function(event) {
     );
 
 });
+
 
 
 self.addEventListener("activate", function(event) {
@@ -35,7 +33,7 @@ self.addEventListener("activate", function(event) {
 
                 nombres.map(function(nombre) {
 
-                    if (nombre != "mi-lista-v4") {
+                    if (nombre != "mi-lista-v6") {
 
                         return caches.delete(nombre);
 
@@ -52,7 +50,32 @@ self.addEventListener("activate", function(event) {
 });
 
 
+
 self.addEventListener("fetch", function(event) {
+
+
+    // Si se está intentando abrir una página
+
+    if (event.request.mode == "navigate") {
+
+        event.respondWith(
+
+            fetch(event.request)
+
+                .catch(function() {
+
+                    return caches.match("./offline.html");
+
+                })
+
+        );
+
+        return;
+
+    }
+
+
+    // Para los demás archivos usamos la caché
 
     event.respondWith(
 

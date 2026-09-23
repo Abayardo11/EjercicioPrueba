@@ -330,7 +330,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
 
 
-
     <script>
 
 
@@ -338,7 +337,7 @@
 
         const firebaseConfig = {
 
-            apiKey: "AIzaSyATiJwpfYrsnEbVGtnuZxklN-XFUs7szjw",
+            apiKey: "AIzaSyATiJwpfyYrsnEbVGtnuZxklN-XFUs7szjw",
 
             authDomain: "ejerciciopruebaa.firebaseapp.com",
 
@@ -367,8 +366,6 @@
 
 
 
-        // MOSTRAR REGISTRO
-
         function mostrarRegistro() {
 
             document.getElementById("login").style.display = "none";
@@ -381,8 +378,6 @@
 
 
 
-        // MOSTRAR LOGIN
-
         function mostrarLogin() {
 
             document.getElementById("login").style.display = "block";
@@ -394,8 +389,6 @@
         }
 
 
-
-        // CREAR CUENTA
 
         function crearCuenta() {
 
@@ -445,8 +438,6 @@
 
 
 
-        // INICIAR SESIÓN
-
         function iniciarSesion() {
 
             let email =
@@ -479,8 +470,6 @@
 
 
 
-        // DETECTAR USUARIO
-
         auth.onAuthStateChanged(function(user) {
 
             if (user) {
@@ -503,8 +492,6 @@
 
 
 
-        // MOSTRAR APLICACIÓN
-
         function mostrarAplicacion(user) {
 
             document.getElementById("login").style.display = "none";
@@ -518,8 +505,6 @@
                 "Hola, " + (user.displayName || user.email);
 
 
-            // TAREAS DEL USUARIO ACTUAL
-
             tareasRef = db
                 .ref("usuarios")
                 .child(user.uid)
@@ -531,8 +516,6 @@
         }
 
 
-
-        // ESCUCHAR TAREAS
 
         function escucharTareas() {
 
@@ -573,7 +556,6 @@
 
                     boton.innerText = "Eliminar";
 
-
                     boton.className = "boton-eliminar";
 
 
@@ -597,8 +579,6 @@
         }
 
 
-
-        // AGREGAR TAREA
 
         function agregarTarea() {
 
@@ -631,8 +611,6 @@
 
 
 
-        // ELIMINAR TAREA
-
         function eliminarTarea(id) {
 
             tareasRef
@@ -643,14 +621,35 @@
 
 
 
-        // CERRAR SESIÓN
-
         function cerrarSesion() {
 
             auth.signOut();
 
         }
 
+
+    </script>
+
+
+
+    <!-- SERVICE WORKER -->
+
+    <script>
+
+        if ("serviceWorker" in navigator) {
+
+            navigator.serviceWorker.register("wifioff.js");
+
+        }
+
+
+        // Si se pierde internet mientras estás usando la aplicación
+
+        window.addEventListener("offline", function() {
+
+            window.location.href = "offline.html";
+
+        });
 
     </script>
 
